@@ -59,13 +59,11 @@ var player = {
 var bullets = [];
 var enemies = [];
 var explosions = [];
-var manas = [{pos: [60, 100],
-            sprite: new Sprite('img/sprites.png', [2, 150], [46, 46], 12, [0,1])},
-            {pos: [90, 200],
-            sprite: new Sprite('img/sprites.png', [2, 150], [46, 46], 12, [0,1])}];
+var mannaArray = [];
 
 var lastFire = Date.now();
 var gameTime = 0;
+var mannaTime = 0;
 var isGameOver;
 var terrainPattern;
 
@@ -83,6 +81,7 @@ var enemySpeed = 100;
 // Update game objects
 function update(dt) {
     gameTime += dt;
+    mannaTime += 2*dt +1;
 
     handleInput(dt);
     updateEntities(dt);
@@ -96,6 +95,19 @@ function update(dt) {
             sprite: new Sprite('img/sprites.png', [0, 78], [80, 39],
                                6, [0, 1, 2, 3, 2, 1])
         });
+    }
+
+    if(mannaTime >= gameTime+30000*dt) {
+            mannaTime = gameTime;
+
+            var manna = {
+            pos: [Math.random() * (canvas.width - 50),
+                  Math.random() * (canvas.height - 50)],
+            sprite: new Sprite('img/sprites.png', [2, 150], [46, 46], 12, [0,1])};
+
+            if (mannaArray.length < 10) {
+                mannaArray.push(manna);
+            }
     }
 
     checkCollisions();
@@ -188,8 +200,8 @@ function updateEntities(dt) {
     }
 
     //Update all the mana
-    for(var i=0; i<manas.length; i++) {
-        manas[i].sprite.update(dt);
+    for(var i=0; i<mannaArray.length; i++) {
+        mannaArray[i].sprite.update(dt);
     }
 }
 
@@ -250,11 +262,11 @@ function checkCollisions() {
         }
     }
 
-    for(var i=0; i<manas.length; i++) {
-        var pos = manas[i].pos;
-        var size = manas[i].sprite.size;
+    for(var i=0; i<mannaArray.length; i++) {
+        var pos = mannaArray[i].pos;
+        var size = mannaArray[i].sprite.size;
         if(boxCollides(pos, size, player.pos, player.sprite.size)) {
-            manas.splice(i, 1);
+            mannaArray.splice(i, 1);
             playerManna++;
             i--;
         }
@@ -291,7 +303,7 @@ function render() {
     renderEntities(bullets);
     renderEntities(enemies);
     renderEntities(explosions);
-    renderEntities(manas);
+    renderEntities(mannaArray);
 };
 
 function renderEntities(list) {
@@ -321,9 +333,11 @@ function reset() {
     isGameOver = false;
     gameTime = 0;
     score = 0;
+    playerManna = 0;
 
     enemies = [];
     bullets = [];
+    mannaArray = [];
 
     player.pos = [50, canvas.height / 2];
 };
